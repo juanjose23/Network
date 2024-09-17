@@ -1,0 +1,133 @@
+{% extends "network/layout.html" %}
+{% block body %}
+
+{% for post in page_obj %}
+<div class="mt-3">
+    <div class="card position-relative">
+        <!-- Botón de seguir o dejar de seguir -->
+        {% if post.author != user %}
+        <button id="follow-button-{{ post.author_id }}" 
+                onclick="toggleFollow({{ post.author_id }})" 
+                class="btn btn-outline-primary position-absolute top-0 end-0 m-2">
+            {% if post.following %}
+                Dejar de seguir
+            {% else %}
+                Seguir
+            {% endif %}
+        </button>
+        {% endif %}
+        
+        <div class="px-3 pt-4 pb-2">
+            <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center">
+                    <!-- Avatar -->
+                    <a href="{% url 'user_profile' post.author %}">
+                      <img style="width:50px" class="me-2 avatar-sm rounded-circle"
+                      src="https://api.dicebear.com/6.x/fun-emoji/svg?seed={{ post.author }}"
+                      alt="{{ post.author }} Avatar">
+                     </a>
+                  
+                    <div>
+                        <!-- Nombre del autor -->
+                        <h5 class="card-title mb-0">
+                            <a href="{% url 'user_profile' post.author %}">{{ post.author }}</a>
+                        </h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card-body">
+            <!-- Contenido de la publicación -->
+            <p class="fs-6 fw-light text-muted">
+                {{ post.content }}
+            </p>
+            
+            <div class="d-flex justify-content-between">
+                <div>
+                    <!-- Sección de likes -->
+                    <a href="#" class="fw-light nav-link fs-6">
+                        <span class="fas fa-heart me-1"></span> 
+                        Likes: <span id="likes-count-{{ post.id }}">{{ post.likes }}</span>
+                    </a>
+                    
+                    <!-- Botón de like (sólo si el usuario está autenticado) -->
+                    {% if user.is_authenticated %}
+                    <button onclick="toggleLike({{ post.id }})" id="like-button-{{ post.id }}" 
+                            class="btn btn-outline-primary">
+                        {% if post.liked %}
+                        Unlike 👎
+                        {% else %}
+                        Like 👍
+                        {% endif %}
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- Sección de timestamp -->
+                <div>
+                    <span class="fs-6 fw-light text-muted">
+                        <span class="fas fa-clock"></span> {{ post.timestamp }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
+
+<nav aria-label="Page navigation example m-2">
+    <ul class="pagination">
+      <!-- Link to the first and previous pages -->
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1">&laquo; First</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" tabindex="-1">&laquo; First</a>
+        </li>
+        <li class="page-item disabled">
+          <a class="page-link" tabindex="-1">Previous</a>
+        </li>
+      {% endif %}
+  
+      <!-- Display page numbers -->
+      {% for num in page_obj.paginator.page_range %}
+        {% if num == page_obj.number %}
+          <li class="page-item active">
+            <span class="page-link">{{ num }}</span>
+          </li>
+        {% else %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+  
+      <!-- Link to the next and last pages -->
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">Last &raquo;</a>
+        </li>
+      {% else %}
+        <li class="page-item disabled">
+          <a class="page-link" tabindex="-1">Next</a>
+        </li>
+        <li class="page-item disabled">
+          <a class="page-link" tabindex="-1">Last &raquo;</a>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+  
+
+
+{% endblock %}
